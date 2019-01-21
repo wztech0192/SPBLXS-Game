@@ -1,0 +1,384 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Nov 2, 2018, 3:48:33 PM
+    Author     : Wei Zheng
+*/
+
+
+
+
+html,body{
+    width:100%;
+    height:100%;
+    padding:0;
+    margin:0;
+
+    font:  1em Georgia, Times, serif;
+    /*font-family:  Arial, Helvetica, sans-serif;*/
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+    -moz-user-select: none;     /* Firefox all */
+    -ms-user-select: none;      /* IE 10+ */
+    -user-select: none;  
+    /*-webkit-transform: translateZ(0) !important;*/
+    -webkit-user-drag: none; /* Safari 3.1+ */ 
+    -moz-user-drag: none; /* Firefox 2+ */ 
+    -ms-user-drag: none; /* IE 10+ */ 
+    -user-drag: none; /* Standard syntax */ 
+    -webkit-appearance:none;
+    font-family: "Lato", sans-serif;
+
+    overflow: hidden;
+
+
+}
+
+canvas{
+    position:fixed;
+    left:0%;
+    top:0%;
+}
+
+#player{
+    position:fixed;
+    /*background: url(../img/player.png);*/
+    background-color:rgb(55, 118, 137);
+    z-index:1;
+    box-shadow: 0px 0px 20px rgb(55, 118, 137);
+}
+
+.playerShield{
+    box-shadow: 0px 0px 20px 5px cyan !important;
+    background-color:cyan !important;
+}
+
+
+#container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    z-index: -1;
+}
+
+#pause {
+    display:none;
+    position:absolute; 
+    text-decoration: none;
+
+    padding: 15px 22px;
+
+    font-size: 1.5vw;
+    cursor: pointer;
+
+    border-style:outset;
+    border-color:grey;
+    border-width: 0 2px 2px 0;
+    text-shadow:#8b50d8 1px 0 80px ;
+    padding:10px 0;
+    width:15%;
+    color:white;
+    transition:0.5s ease;
+    background-color: transparent;
+    border-radius: 0 0 25px 0;
+    z-index: 10;
+}
+#pause:focus {
+    outline:0;
+}
+
+#pause:hover{
+    background-color:rgba(172, 192, 224,0.2);
+}
+
+
+#menu{
+    font-size: 125%;
+    background-color: transparent; 
+    position:absolute;
+    display:block;
+    width:40%;
+    left:30%;
+    height: 5%;
+    transition: 0.5s ease;
+
+    animation: showmenu 1s ease;
+
+}
+
+/* The animation code */
+@keyframes showmenu {
+    from {transform:scale(0)}
+    to {transform:scale(1)}
+}
+
+.menuhide{
+    opacity: 0;
+    transform: scale(0);
+}
+.menulegend{
+    text-align: center;
+    font-size:200%;
+    border:none;
+    color:white;
+    text-shadow:#8b50d8 1px 0 80px ;
+    margin: 0;
+}
+fieldset{
+    border:none;
+}
+
+
+.menuButton{
+    text-align: center;
+    border:1px outset grey;
+    padding:3%;
+    margin:20px; 
+    color:white;
+    transition:0.2s ease;
+    text-shadow:#8b50d8 1px 0 40px;
+}
+.menuButton:hover{
+    background-color:rgba(172, 192, 224,0.2);
+    transform: scale(1.2);
+}
+
+#restart{
+    display:none;
+}
+input[type='text']{
+    margin-left:10px;
+    background:transparent;
+    color:white;
+    padding:5px;   
+}
+
+
+#itemContent{
+
+    display:none;
+    position:absolute; 
+    margin:0;
+    padding:0;
+    left:40%;
+    bottom:0;
+    width:20%;
+}
+#itemContent th{
+
+    box-shadow: inset 0px 0px 100px #384c54;
+    padding:10px 0;
+    width:50%;
+    color:white;
+    transition:0.5s ease;
+    background-color:grey;
+    border-radius:10px;
+}
+#itemContent th:hover{
+    transform: scale(1.2);  
+}
+
+.select_weapon{
+    box-shadow: inset 0px 0px 100px rgb(55, 118, 137) !important;
+}
+
+.scoreboard {
+    text-align: center;
+    overflow: hidden;
+    width: 80%;
+    margin: 0 auto;
+    margin-top:75px;
+    border-collapse: collapse;
+    position: relative;
+    z-index: 3;
+    opacity: 0;
+    transform: scale(0);
+    transition: 0.5s ease;
+    table-layout:fixed;
+}
+
+.scoreboard th {
+    font-family: cursive;
+    font-size:30px; 
+    text-align: center;
+    color: #4DC3FA;
+    background-color: #1F2739;
+    text-shadow:black 1px 0 20px;
+}
+
+.scoreboard tr{
+    height: 7vh;
+}
+
+.scoreboard td {
+    text-shadow:black 2px 2px 15px;
+    color:white;
+    transition:0.3s ease;
+    font-size:20px;
+}
+
+.scoreboard tr:hover {
+    background-color: #464A52;
+    -webkit-box-shadow: 0 6px 6px -6px #0E1119;
+    -moz-box-shadow: 0 6px 6px -6px #0E1119;
+    box-shadow: 0 6px 6px -6px #0E1119;
+}
+.scoreboard td:hover {
+    background-color: #eadef7;
+    color: #403E10;
+    font-weight: bold;
+    box-shadow: #d2b8ed -1px 1px, #d2b8ed -2px 2px, #d2b8ed -3px 3px, #d2b8ed -4px 4px, #d2b8ed -5px 5px, #d2b8ed -6px 6px;
+    transform: translate3d(6px, -6px, 0);
+}
+
+/* Background-color of the odd rows */
+.scoreboard tr:nth-child(odd) {
+    background-color: #323C50;
+}
+
+/* Background-color of the even rows */
+.scoreboard tr:nth-child(even) {
+    background-color: #2C3446;
+}
+.scoreboard td:first-child { color: #FB667A; }
+
+
+.mapsize{
+    display: inline-block;
+    width:25px;
+    height:25px;
+    margin:0 5px;
+    border: grey inset 1px;
+    border-radius: 10px;
+    transition:0.2s ease;
+}
+.mapsize:hover{
+    background-color:rgba(172, 192, 224,0.2);
+    transform: scale(1.3);
+}
+.mapselect{
+    background-color:rgba(172, 192, 224,0.4);
+}
+
+
+footer{
+    font-family:cursive;
+    z-index:20;
+    color:white;
+    position:absolute;
+    bottom:10px;
+    width:100%;
+}
+#copyright{
+    font-size:8px;
+    margin-left:10px;
+
+}
+
+#version{
+    font-size:12px;
+    margin-right:10px;
+    float:right;
+}
+
+#contactInfo {
+    font-size: 125%;
+    background-color: transparent; 
+    position:absolute;
+    width:50%;
+    left:25%;
+    top:10%;
+    color: white;
+    text-align: center;
+    transition: 0.5s ease;
+    font-family: string;
+    overflow-y: auto  ;
+    height:80%;
+    opacity: 0;
+    transform: scale(0);
+}
+#GameInfo1{
+    font-size: 125%;
+    background-color: transparent; 
+    position:absolute;
+    width:50%;
+    left:25%;
+    top:10%;
+    color: white;
+    text-align: center;
+    transition: 0.5s ease;
+    font-family: string;
+    overflow-y: auto  ;
+    height:80%;
+    opacity: 0;
+    transform: scale(0);
+}
+#debug{
+    font-size: 125%;
+    background-color: transparent; 
+    position:absolute;
+    width:50%;
+    left:25%;
+    top:10%;
+    color: white;
+    
+    transition: 0.5s ease;
+    font-family: string;
+    overflow-y: auto  ;
+    height:80%;
+    opacity: 0;
+    transform: scale(0);
+}
+#debug h1{
+    text-align: center;
+}
+
+#contactInfo u{
+    font-size:135%;
+}
+.btnShow{
+
+    opacity: 1 !important;
+    transform: scale(1) !important;
+
+}
+@media (max-width: 600px) {
+    .scoreboard td:nth-child(4),
+    .scoreboard th:nth-child(4) { 
+        display: none; 
+    }
+    .scoreboard th{
+        font-size:100%;
+    }
+
+    #menu{
+        width:100%;
+        left:0;
+    }
+
+    #contactInfo{
+        left:5%;
+        width:90%;
+    }
+    #GameInfo{
+        left:5%;
+        width:90%;
+        
+    }
+    #debug{
+        left:5%;
+        width:90%;
+        
+    }
+
+}
+/*---------------------------------------*/
+
+
+
+
+
