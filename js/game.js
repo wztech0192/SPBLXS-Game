@@ -413,7 +413,7 @@ function gameStart() {
     //generate block
     generateMap(0, mapSize.x);
     //set blur effect
-    setBlur();
+    //setBlur();
 
     //draw the game
     draw();
