@@ -1,199 +1,213 @@
-/* 
+/*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 
-
 /*----------------GLOABL VARIABLES----------------*/
 var start = false;
 
-var canvas;                //canvas
-var ctx;          //canvas context
+var canvas; //canvas
+var ctx; //canvas context
 var bldCanvasColor;
 var energyCanvasColor;
 var flyCanvasColor;
 
+var playerName; //player name
 
-var playerName;                    //player name
-
-var mouse = {//mouse location
+var mouse = {
+    //mouse location
     x: 0,
     y: 0,
     //get mouse x and y base on block map
     mapXY: function () {
         if (start) {
             return {
-                x: (player.p.x) + mouse.x - canvas.width / 2,
-                y: (player.p.y + blockSize / 2) + mouse.y - canvas.height / 2
+                x: player.p.x + mouse.x - canvas.width / 2,
+                y: player.p.y + blockSize / 2 + mouse.y - canvas.height / 2
             };
         }
         return null;
     }
 };
-var mapSize = {//map size x*y
+var mapSize = {
+    //map size x*y
     x: 600,
     y: 300
 };
 
-var blockSize = 15;                         //size of each block. Make sure all speed cannot greater than block size
-var movementSpeed = blockSize / 5;                      //movement speed
-var jumpFuel = 300;                         //jump power
-var playerWeaponList = [//player weapon (speed, size, dmg, travelRange, cooldown, consume, hp, color)
+var blockSize = 15; //size of each block. Make sure all speed cannot greater than block size
+var movementSpeed = blockSize / 5; //movement speed
+var jumpFuel = 300; //jump power
+var playerWeaponList = [
+    //player weapon (speed, size, dmg, travelRange, cooldown, consume, hp, color)
     //rifle
-    new Weapon(movementSpeed * 2, blockSize / 4, 5, blockSize * 5, 150, 1, 1, 'rgb(100,255,255)'),
+    new Weapon(movementSpeed * 2, blockSize / 4, 5, blockSize * 5, 150, 1, 1, "rgb(100,255,255)"),
     //snipe
-    new Weapon(movementSpeed * 4, blockSize / 2, 20, blockSize * 10, 1000, 30, 3, 'rgb(10,255,255)'),
+    new Weapon(
+        movementSpeed * 4,
+        blockSize / 2,
+        20,
+        blockSize * 10,
+        1000,
+        30,
+        3,
+        "rgb(10,255,255)"
+    ),
     //super weapon
-    new Weapon(blockSize / 2, blockSize * 2, 20, blockSize * 30, 20, 1, 5, '#0a4960')
+    new Weapon(blockSize / 2, blockSize * 2, 20, blockSize * 30, 20, 1, 5, "#0a4960")
 ];
 var initEnergy = 2000;
-var energy = initEnergy;                          //consuming energy
-var playerHP = 400;                         //player health
-var digpower = 5;                             //digging power
-var blockhp = 10;                             //default block health
-var energyShield = false;                        //use energy to replace hp
-var spawnPoint = {x: mapSize.x * blockSize / 2, //player spawn point
-    y: (mapSize.y * blockSize / 2.2)
+var energy = initEnergy; //consuming energy
+var playerHP = 400; //player health
+var digpower = 5; //digging power
+var blockhp = 10; //default block health
+var energyShield = false; //use energy to replace hp
+var spawnPoint = {
+    x: (mapSize.x * blockSize) / 2, //player spawn point
+    y: (mapSize.y * blockSize) / 2.2
 };
 
-var player;                                 //player
-var tool = 1;                                 //selected tool (e.g. block destroyer, gun...)
-var toolName = ['rifle', 'sniper', 'hack weapon'];
-var blockMap;                               //data structure to store each block's data
-var animate;                                //animating
-var blockCanvas;                            //block canvas for block background
-var blockCtx;                               //block context for drawing
+var player; //player
+var tool = 1; //selected tool (e.g. block destroyer, gun...)
+var toolName = ["rifle", "sniper", "hack weapon"];
+var blockMap; //data structure to store each block's data
+var animate; //animating
+var blockCanvas; //block canvas for block background
+var blockCtx; //block context for drawing
 
-var bulletList = new LinkedList();          //bullet data structure
-var lootList = new LinkedList();              //loots
+var bulletList = new LinkedList(); //bullet data structure
+var lootList = new LinkedList(); //loots
 var bloodList = new LinkedList();
-var enemyList = new LinkedList();            //enemy list
+var enemyList = new LinkedList(); //enemy list
 var enemySpawnSize = 5;
 var spawn = enemySpawnSize;
 var wait = false;
 var boss = false;
 
-//(speed, size, dmg, travelRange, cooldown, consume, hp, color) 
+//(speed, size, dmg, travelRange, cooldown, consume, hp, color)
 //enemy attribute
 var enemyWeapon = [
     //enemy1
-    new Weapon(movementSpeed, blockSize / 4, 5, blockSize * 40, 600, 0, 2, 'white'),
+    new Weapon(movementSpeed, blockSize / 4, 5, blockSize * 40, 600, 0, 2, "white"),
     //enemy2
-    new Weapon(movementSpeed * 1.4, blockSize / 2, 5, blockSize * 40, 1500, 0, 5, 'white'),
+    new Weapon(movementSpeed * 1.4, blockSize / 2, 5, blockSize * 40, 1500, 0, 5, "white"),
     //enemy3
-    new Weapon(movementSpeed, blockSize * 3, 5, blockSize * 40, 100, 0, 5, '#0a4960'),
+    new Weapon(movementSpeed, blockSize * 3, 5, blockSize * 40, 100, 0, 5, "#0a4960"),
     //enemy3
-    new Weapon(movementSpeed * 3, blockSize / 3, 2, blockSize * 50, 1, 0, 4, '#0a4960'),
+    new Weapon(movementSpeed * 3, blockSize / 3, 2, blockSize * 50, 1, 0, 4, "#0a4960"),
     //enemy3
-    new Weapon(movementSpeed * 0.8, blockSize * 8, 100, blockSize * 60, 4000, 0, 300, '#0a4960')
+    new Weapon(movementSpeed * 0.8, blockSize * 8, 100, blockSize * 60, 4000, 0, 300, "#0a4960")
 ];
 
+var lastLoop = new Date(); //use to calculate fps
+var thisLoop = new Date(); //use to calculate fps
+var fps; //measure frame rate per second
 
-var lastLoop = new Date();                  //use to calculate fps
-var thisLoop = new Date();                  //use to calculate fps
-var fps;                                    //measure frame rate per second
-
-var surviveTime = 0;                          //second player survived
-var score = 0;                                //player score
-var godMode = false;                         //god mode allow player not dying
-var testing = false;                           //active game testing and debugging
-var die=false;
-
+var surviveTime = 0; //second player survived
+var score = 0; //player score
+var godMode = false; //god mode allow player not dying
+var testing = false; //active game testing and debugging
+var die = false;
 
 /*----------------READY EVENT----------------*/
 $(document).ready(function () {
-
-
-    canvas = $('canvas')[0];
+    canvas = $("canvas")[0];
     ctx = canvas.getContext("2d");
 
     //play game button
-    $('#pg').click(function () {
+    $("#pg").click(function () {
         if (!start) {
             //set player name
-            playerName = $('#playername').find('input').val();
-            if (playerName.trim() === '') {
+            playerName = $("#playername").find("input").val();
+            if (playerName.trim() === "") {
                 //if player name is empty ask if player when to play as anonymous
-                if (confirm('Play as Anonymous?')) {
-                    playerName = 'Anonymous';
-                    $(this).text('GOOD LUCK!!');
+                if (confirm("Play as Anonymous?")) {
+                    playerName = "Anonymous";
+                    $(this).text("GOOD LUCK!!");
                     gameStart();
                 }
             } else {
-                $(this).text('GOOD LUCK!!');
+                $(this).text("GOOD LUCK!!");
                 gameStart();
             }
         } else if (player.hp < 0) {
             //show restart button and restart the game when game over
-            $('#restart').show();
-	    die=false;
+            $("#restart").show();
+            die = false;
             restart();
         } else {
             pause_resume_Game();
         }
 
         if (start) {
-            $("#player").fadeIn('easing');
-            $("#menu").addClass('menuhide');
-            $("#myCanvas").fadeIn('easing');
-            $("#pause").fadeIn('easing');
-            $('#itemContent').fadeIn('easing');
-            $('footer').fadeOut('easing');
+            $("#player").fadeIn("easing");
+            $("#menu").addClass("menuhide");
+            $("#myCanvas").fadeIn("easing");
+            $("#pause").fadeIn("easing");
+            $("#itemContent").fadeIn("easing");
+            $("footer").fadeOut("easing");
         }
     });
-
-
 
     //pause button
     $("#pause").click(function () {
         if (player.hp > 0) {
-            $('#pg').text('Resume Game');
-            $('.menulegend').text('PAUSE');
+            $("#pg").text("Resume Game");
+            $(".menulegend").text("PAUSE");
         } else {
-            $('#pg').text('Restart');
-            $('.menulegend').text('YOU DIE');
+            $("#pg").text("Restart");
+            $(".menulegend").text("YOU DIE");
         }
-        $('#player').toggle();
-        $("#menu").removeClass('menuhide');
-        $("#myCanvas").fadeOut('easing');
-        $('#itemContent').fadeOut('easing');
+        $("#player").toggle();
+        $("#menu").removeClass("menuhide");
+        $("#myCanvas").fadeOut("easing");
+        $("#itemContent").fadeOut("easing");
         $("#pause").hide();
-        $('footer').fadeIn('easing');
+        $("footer").fadeIn("easing");
         pause_resume_Game();
     });
 
     //restart button
-    $('#restart').click(function () {
+    $("#restart").click(function () {
         //restart game if player confirmed
-        if (confirm('Are you sure to restart?')) {
+        if (confirm("Are you sure to restart?")) {
             restart();
-            $("#player").fadeIn('easing');
-            $("#menu").addClass('menuhide');
-            $("#myCanvas").fadeIn('easing');
-            $("#pause").fadeIn('easing');
-            $('#itemContent').fadeIn('easing');
+            $("#player").fadeIn("easing");
+            $("#menu").addClass("menuhide");
+            $("#myCanvas").fadeIn("easing");
+            $("#pause").fadeIn("easing");
+            $("#itemContent").fadeIn("easing");
         }
     });
     //show contact Information
-    $('.cInfo').click(function () {
-        $('.contactInfo').fadeIn('easing');
+    $(".cInfo").click(function () {
+        $(".contactInfo").fadeIn("easing");
     });
 
     //change map size selection
-    $('.mapsize').click(function () {
-        $('.mapselect').removeClass('mapselect');
-        $(this).addClass('mapselect');
+    $(".mapsize").click(function () {
+        $(".mapselect").removeClass("mapselect");
+        $(this).addClass("mapselect");
     });
 
     //show scoreboard when click on score board button
     $("#scoreB1").click(function () {
         //populate table by database value
-        $.post('scoreBoard.php').done(function (data) {
+        $.post("scoreBoard.php").done(function (data) {
             var tbody = "";
             data = $.parseJSON(data);
             $(data).each(function (i, v) {
-                tbody += "<tr><td>" + (i + 1) + "</td><td>" + v.name + "</td><td>" + v.score + "</td><td>" + v.survivetime + "</td></tr>";
+                tbody +=
+                    "<tr><td>" +
+                    (i + 1) +
+                    "</td><td>" +
+                    v.name +
+                    "</td><td>" +
+                    v.score +
+                    "</td><td>" +
+                    v.survivetime +
+                    "</td></tr>";
             });
             $(".scoreboard tbody").html(tbody);
             buttonContent($(".scoreboard"), true);
@@ -205,74 +219,76 @@ $(document).ready(function () {
         buttonContent($(this), false);
     });
 
-    $('#cInfo').click(function () {
+    $("#cInfo").click(function () {
         buttonContent($("#contactInfo"), true);
-       // $("#contactInfo p").fadeIn('easing');
+        // $("#contactInfo p").fadeIn('easing');
     });
-    $('#contactInfo').click(function () {
+    $("#contactInfo").click(function () {
         buttonContent($(this), false);
         //$("#contactInfo p").fadeOut('easing');
     });
-     $('#gInfo').click(function () {
+    $("#gInfo").click(function () {
         buttonContent($("#GameInfo1"), true);
-       // $("#contactInfo p").fadeIn('easing');
+        // $("#contactInfo p").fadeIn('easing');
     });
-    $('#GameInfo1').click(function () {
+    $("#GameInfo1").click(function () {
         buttonContent($(this), false);
         //$("#contactInfo p").fadeOut('easing');
     });
-    $('#dInfo').click(function () {
+    $("#dInfo").click(function () {
         buttonContent($("#debug"), true);
-       // $("#contactInfo p").fadeIn('easing');
+        // $("#contactInfo p").fadeIn('easing');
     });
-    $('#debug').click(function () {
+    $("#debug").click(function () {
         buttonContent($(this), false);
         //$("#contactInfo p").fadeOut('easing');
     });
-    
 
     //show button content when click or hide content
     function buttonContent(btn, show) {
         if (show) {
-            btn.addClass('btnShow');
-            $("#menu").addClass('menuhide');
+            btn.addClass("btnShow");
+            $("#menu").addClass("menuhide");
         } else {
-            btn.removeClass('btnShow');
-            $("#menu").removeClass('menuhide');
+            btn.removeClass("btnShow");
+            $("#menu").removeClass("menuhide");
         }
     }
 
     //item log click event
-    $('#itemContent th').click(function () {
+    $("#itemContent th").click(function () {
         tool = $(this).index() + 1;
         player.weapon = playerWeaponList[tool - 1];
-        $('.select_weapon').removeClass('select_weapon');
-        $(this).addClass('select_weapon');
+        $(".select_weapon").removeClass("select_weapon");
+        $(this).addClass("select_weapon");
     });
 
     //disable right click
-    $('body').on('contextmenu', '*', function () {
+    $("body").on("contextmenu", "*", function () {
         return false;
     });
     //click event
-    $(canvas).mousedown(function (e) {
-        if (start) {
-            //1 -> left click
-            //2 -> middle click
-            //3 -> right click
-            player.click = e.which;
-        }
-    }).mouseup(function () {
-        if (start) {
-            //-1 will close click event
-            player.click = -1;
-        }
-    }).mousemove(function (e) {
-        if (start) {
-            mouse.x = e.clientX;
-            mouse.y = e.clientY;
-        }
-    });
+    $(canvas)
+        .mousedown(function (e) {
+            if (start) {
+                //1 -> left click
+                //2 -> middle click
+                //3 -> right click
+                player.click = e.which;
+            }
+        })
+        .mouseup(function () {
+            if (start) {
+                //-1 will close click event
+                player.click = -1;
+            }
+        })
+        .mousemove(function (e) {
+            if (start) {
+                mouse.x = e.clientX;
+                mouse.y = e.clientY;
+            }
+        });
 
     /*  //click event
      canvas.addEventListener('touchstart', function (e) {
@@ -346,64 +362,74 @@ $(document).ready(function () {
                 case 84: //t
                     if (energyShield) {
                         energyShield = false;
-                        $('#player').removeClass('playerShield');
+                        $("#player").removeClass("playerShield");
                     } else if (energy >= 300) {
                         //only active if energy is over 300
                         energyShield = true;
-                        $('#player').addClass('playerShield');
+                        $("#player").addClass("playerShield");
                     }
                     break;
-                case 49://1
-                case 81: //q 
-                    $('#itemContent th').eq(0).click();
+                case 49: //1
+                case 81: //q
+                    $("#itemContent th").eq(0).click();
                     break;
-                case 50://2
+                case 50: //2
                 case 69: //e
-                    $('#itemContent th').eq(1).click();
+                    $("#itemContent th").eq(1).click();
                     break;
-                case 27://esc
-                    if(animate!==null)
-                        $("#pause").click();
+                case 27: //esc
+                    if (animate !== null) $("#pause").click();
                     else $("#pg").click();
                     break;
                 case 75:
-                    if (indexConvert(player.p.x, mapSize.x) >= indexConvert(player.p.x + player.width, mapSize.x) && player.down) {
-                        $('#player').css('background-color', '#0a4960');
+                    if (
+                        indexConvert(player.p.x, mapSize.x) >=
+                            indexConvert(player.p.x + player.width, mapSize.x) &&
+                        player.down
+                    ) {
+                        $("#player").css("background-color", "#0a4960");
                         player.weapon = playerWeaponList[2];
                         tool = 4;
                     }
             }
-
         }
     };
-
 });
-
 
 /*----------------INITIALIZING----------------*/
 function setMap(x, y) {
     mapSize.x = x;
     mapSize.y = y;
-    spawnPoint.x = mapSize.x * blockSize / 2;
-    spawnPoint.y = mapSize.y * blockSize / 2.2;
+    spawnPoint.x = (mapSize.x * blockSize) / 2;
+    spawnPoint.y = (mapSize.y * blockSize) / 2.2;
 }
 
 function gameStart() {
     //change map size if map select is S or L. M is default
-    switch ($('.mapselect').text()) {
-        case 'S':
+    switch ($(".mapselect").text()) {
+        case "S":
             setMap(200, 150);
             break;
-        case 'L':
+        case "L":
             setMap(700, 400);
             break;
     }
-    $('#playername').hide();
-    $('#restart').show();
+    $("#playername").hide();
+    $("#restart").show();
     start = true;
     //create player
-    player = new Entity(spawnPoint, blockSize, blockSize * 2, playerHP,
-            jumpFuel, digpower, playerWeaponList[0], mouse, movementSpeed, 'player');
+    player = new Entity(
+        spawnPoint,
+        blockSize,
+        blockSize * 2,
+        playerHP,
+        jumpFuel,
+        digpower,
+        playerWeaponList[0],
+        mouse,
+        movementSpeed,
+        "player"
+    );
     //adjust canvas size to fit full screen
     resizeEvent();
     //create blockCanvas
@@ -425,11 +451,21 @@ function gameStart() {
 
 function createGradientColor() {
     // Create gradient
-    bldCanvasColor = ctx.createLinearGradient(canvas.width, canvas.width / 2, canvas.width / 2, canvas.width / 2);
+    bldCanvasColor = ctx.createLinearGradient(
+        canvas.width,
+        canvas.width / 2,
+        canvas.width / 2,
+        canvas.width / 2
+    );
     bldCanvasColor.addColorStop(1, "rgba(0,0,0,0)");
     bldCanvasColor.addColorStop(0, "rgba(255, 12, 73,0.9)");
     // Create gradient
-    energyCanvasColor = ctx.createLinearGradient(canvas.width, canvas.width / 2, canvas.width / 2, canvas.width / 2);
+    energyCanvasColor = ctx.createLinearGradient(
+        canvas.width,
+        canvas.width / 2,
+        canvas.width / 2,
+        canvas.width / 2
+    );
     energyCanvasColor.addColorStop(1, "rgba(0,0,0,0)");
     energyCanvasColor.addColorStop(0, "rgba(22, 248, 252,0.9)");
     // Create gradient
@@ -440,9 +476,8 @@ function createGradientColor() {
 
 function setBlur() {
     ctx.shadowBlur = 10;
-    ctx.shadowColor = 'white';
+    ctx.shadowColor = "white";
 }
-
 
 //generate new map
 function generateMap(start, end) {
@@ -457,22 +492,21 @@ function generateMap(start, end) {
         }
         //generate each vertical block from half
         for (var y = horizontalLine, level = 1; y < mapSize.y; y++, level++) {
-
             //different layer different block
             var hp;
             var color;
             if (y < mapSize.y * (Math.random() * (0.7 - 0.6) + 0.6)) {
                 hp = blockhp;
-                color = 'rgba(168,168,168,0.7)';
+                color = "rgba(168,168,168,0.7)";
             } else if (y < mapSize.y * (Math.random() * (0.85 - 0.7) + 0.7)) {
                 hp = blockhp * 2;
-                color = 'rgba(148,148,148,0.7)';
+                color = "rgba(148,148,148,0.7)";
             } else if (y < mapSize.y * (Math.random() * (0.9 - 0.87) + 0.87)) {
                 hp = blockhp * 4;
-                color = 'rgba(128,0,128,0.7)';
+                color = "rgba(128,0,128,0.7)";
             } else {
                 hp = blockhp * 500;
-                color = 'rgba(108,108,0,0.7)';
+                color = "rgba(108,108,0,0.7)";
             }
 
             var p = {
@@ -483,8 +517,10 @@ function generateMap(start, end) {
             //create block object
             var obj = new Obj(p, blockSize, hp, color);
             //create new block,  2% chance to contain loot inside the block
-            var block = (Math.round(Math.random() * 100) >= 98) ?
-                    new Block(obj, p, 'loot') : new Block(obj, p);
+            var block =
+                Math.round(Math.random() * 100) >= 98
+                    ? new Block(obj, p, "loot")
+                    : new Block(obj, p);
 
             //draw block into block canvas
             renderBlock(obj, obj.color);
@@ -517,7 +553,7 @@ function secondCounter() {
             //energy consume *5 when open energy shield
             if (energyShield) {
                 energy -= 6;
-            }else if (energy >= player.hp) {
+            } else if (energy >= player.hp) {
                 energy--;
             }
 
@@ -535,11 +571,11 @@ function resizeEvent() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         //set position for player
-        $('#player').css({
-            'left': (canvas.width / 2 - (player.width / 2)).toString() + 'px',
-            'top': (canvas.height / 2 - (player.height * 0.75)).toString() + 'px',
-            'width': player.width.toString() + 'px',
-            'height': player.height.toString() + 'px'
+        $("#player").css({
+            left: (canvas.width / 2 - player.width / 2).toString() + "px",
+            top: (canvas.height / 2 - player.height * 0.75).toString() + "px",
+            width: player.width.toString() + "px",
+            height: player.height.toString() + "px"
         });
         createGradientColor();
     }
@@ -549,8 +585,8 @@ function resizeEvent() {
 /*----------------GAME CONTENT----------------*/
 
 function gameLoop() {
-    //loop game only if 
-    if (godMode || (!die&& player.hp > 0)) {
+    //loop game only if
+    if (godMode || (!die && player.hp > 0)) {
         //update fps
         updateFPS();
         //player move action
@@ -577,13 +613,15 @@ function gameLoop() {
 
 //game over
 function gameover() {
-    die=true;
-    $.post('scoreUpload.php', {name: playerName, score: score, time: surviveTime}).done(function (data) {
+    die = true;
+    $.post("scoreUpload.php", { name: playerName, score: score, time: surviveTime }).done(function (
+        data
+    ) {
         console.log(data);
     });
 
-    $('#restart').hide();
-    $('#pause').click();
+    $("#restart").hide();
+    $("#pause").click();
     //refresh canvas;
     draw();
 }
@@ -621,8 +659,6 @@ function updateFPS() {
     thisLoop = new Date();
 }
 
-
-
 //convert block coordinate to map index
 function indexConvert(val, limit) {
     var index = Math.round(val / blockSize);
@@ -633,8 +669,6 @@ function indexConvert(val, limit) {
     }
     return index;
 }
-
-
 
 /*----------------ALL CLICK FUNCTION----------------*/
 
@@ -655,11 +689,11 @@ function playerClick() {
                     break;
             }
             break;
-            //middle click
+        //middle click
         case 2:
             destroyObject();
             break;
-            //right click
+        //right click
         case 3:
             //place block
             placeObject();
@@ -677,14 +711,17 @@ function shootBullet(shooter, target, inaccurate) {
             //accuracy base on this number, the larger number the lower accuracy
             var accu = blockSize * 4;
             var accurX;
-            var accurY = shooter.p.y + ((accu) - (Math.random() * accu * 2));
+            var accurY = shooter.p.y + (accu - Math.random() * accu * 2);
             if (Math.abs(target.x - shooter.p.x) > blockCanvas.width / 2) {
-                var mx = (shooter.p.x > target.x) ? shooter.p.x - blockCanvas.width : shooter.p.x + blockCanvas.width;
-                accurX = mx + ((accu) - (Math.random() * accu * 2));
+                var mx =
+                    shooter.p.x > target.x
+                        ? shooter.p.x - blockCanvas.width
+                        : shooter.p.x + blockCanvas.width;
+                accurX = mx + (accu - Math.random() * accu * 2);
             } else {
-                accurX = shooter.p.x + ((accu) - (Math.random() * accu * 2));
+                accurX = shooter.p.x + (accu - Math.random() * accu * 2);
             }
-            var newp = {x: accurX, y: accurY};
+            var newp = { x: accurX, y: accurY };
             velocity = getVelocity(newp, target, shooter.weapon.speed);
         } else {
             //use getVelocity() from func.js to get velocity between shooter and target point
@@ -705,26 +742,33 @@ function shootBullet(shooter, target, inaccurate) {
 //player place object event
 function placeObject() {
     //access click block function with callback function
-    clickBlock(function (mapBlock, x, y) {
-        //add static block object to the block if it is empty 
-        if (mapBlock.stObj === null && mapBlock.objs.indexOf(player) < 0) {
-            var obj = new Obj({x: x * blockSize, y: y * blockSize}, blockSize, blockhp * 2, 'rgba(0,255,255,0.1)');
-            mapBlock.stObj = obj;
-            renderBlock(obj, 'rgba(0,255,255,0.2)');
+    clickBlock(
+        function (mapBlock, x, y) {
+            //add static block object to the block if it is empty
+            if (mapBlock.stObj === null && mapBlock.objs.indexOf(player) < 0) {
+                var obj = new Obj(
+                    { x: x * blockSize, y: y * blockSize },
+                    blockSize,
+                    blockhp * 2,
+                    "rgba(0,255,255,0.1)"
+                );
+                mapBlock.stObj = obj;
+                renderBlock(obj, "rgba(0,255,255,0.2)");
+                energy -= 2;
+            }
+        },
+        function (x, y) {
+            var p = {
+                x: x * blockSize,
+                y: y * blockSize
+            };
+            //if this block is empty create the block with the object added
+            var obj = new Obj(p, blockSize, blockhp * 2, "rgba(0,255,255,0.1)");
+            blockMap[x][y] = new Block(obj, p);
+            renderBlock(obj, "rgba(0,255,255,0.2)");
             energy -= 2;
         }
-    }
-    , function (x, y) {
-        var p = {
-            x: x * blockSize,
-            y: y * blockSize
-        };
-        //if this block is empty create the block with the object added
-        var obj = new Obj(p, blockSize, blockhp * 2, 'rgba(0,255,255,0.1)');
-        blockMap[x][y] = new Block(obj, p);
-        renderBlock(obj, 'rgba(0,255,255,0.2)');
-        energy -= 2;
-    });
+    );
 }
 
 function destroyObject() {
@@ -739,7 +783,7 @@ function destroyObject() {
                 //trigger player move event
                 player.moved = true;
                 //add loot if this block has loot
-                if (mapBlock.background === 'loot') {
+                if (mapBlock.background === "loot") {
                     //pass block
                     addLoot(mapBlock);
                 }
@@ -752,9 +796,12 @@ function destroyObject() {
 function clickBlock(success, fail) {
     //check click range
     var centerX = canvas.width / 2;
-    var centerY = (canvas.height / 2) - blockSize / 2;
+    var centerY = canvas.height / 2 - blockSize / 2;
     //make sure clicking location is inside block range of player
-    if (Math.abs(mouse.x - centerX) <= blockSize * 5.5 && Math.abs(mouse.y - centerY) <= blockSize * 5.5) {
+    if (
+        Math.abs(mouse.x - centerX) <= blockSize * 5.5 &&
+        Math.abs(mouse.y - centerY) <= blockSize * 5.5
+    ) {
         var mapmouse = mouse.mapXY();
         //get mosue x and y based on player location
         var x = indexConvert(mapmouse.x, mapSize.x);
@@ -770,11 +817,7 @@ function clickBlock(success, fail) {
             fail(x, y);
         }
     }
-
 }
-
-
-
 
 /*----------------MOVEMENT COLLISION----------------*/
 
@@ -784,7 +827,7 @@ function playerMove() {
     //for player walk left or right
     if (player.left || player.right) {
         //create a new x position based on direction.
-        newX = (player.left) ? player.p.x - player.speed : player.p.x + player.speed;
+        newX = player.left ? player.p.x - player.speed : player.p.x + player.speed;
         //teleport player to other side if player walk out of the map
         if (newX >= blockCanvas.width) {
             newX -= blockCanvas.width;
@@ -796,7 +839,6 @@ function playerMove() {
             player.p.x = newX;
             //player moved
             player.moved = true;
-
         }
     }
     //update block player occupied
@@ -806,7 +848,6 @@ function playerMove() {
 
     //jump action
     if (player.up && player.jf > 0) {
-
         newY = player.p.y - player.speed;
         //check if there is a barrier on top
         if (!barrier_UpDown(player, newY - player.halfHeight, false)) {
@@ -814,7 +855,7 @@ function playerMove() {
             player.moved = true;
             //set new position
             player.p.y = newY;
-            //decrease jump time              
+            //decrease jump time
         }
         player.jf--;
     }
@@ -822,18 +863,15 @@ function playerMove() {
     else if (player.moved) {
         //falling speed
         newY = player.p.y + player.speed;
-        if (!barrier_UpDown(player, (newY + player.halfHeight), true)) {
+        if (!barrier_UpDown(player, newY + player.halfHeight, true)) {
             player.p.y = newY;
-
         } else {
             //reset jump
             player.recoverJump();
             player.moved = false;
             updateOccupied(player, player.halfWidth, player.halfHeight);
         }
-    } else
-        player.recoverJump();
-
+    } else player.recoverJump();
 }
 
 //detect upper or lower barrier
@@ -852,13 +890,12 @@ function barrier_UpDown(obj, newY, land) {
     if (minxi === maxxi) {
         //return true if block has a static object
         if (checkBlock(minxi, yi)) {
-            if (testing)
-                renderBlock(blockMap[minxi][yi].stObj, 'lightgreen');
+            if (testing) renderBlock(blockMap[minxi][yi].stObj, "lightgreen");
             if (land) {
                 //make sure player wont stuck into the block
-                obj.p.y = ((yi * blockSize) - (obj.halfHeight) - blockSize / 2);
+                obj.p.y = yi * blockSize - obj.halfHeight - blockSize / 2;
             } else {
-                obj.p.y = ((yi * blockSize) + (obj.halfHeight) + blockSize / 2);
+                obj.p.y = yi * blockSize + obj.halfHeight + blockSize / 2;
             }
             return true;
         }
@@ -869,13 +906,12 @@ function barrier_UpDown(obj, newY, land) {
                 //     console.log(minxi+" "+maxxi);
                 //return true if there is a barrier
                 if (checkBlock(minxi, yi)) {
-                    if (testing)
-                        renderBlock(blockMap[minxi][yi].stObj, 'lightgreen');
+                    if (testing) renderBlock(blockMap[minxi][yi].stObj, "lightgreen");
                     if (land) {
                         //make sure player wont stuck into the block
-                        obj.p.y = ((yi * blockSize) - (obj.halfHeight) - blockSize / 2);
+                        obj.p.y = yi * blockSize - obj.halfHeight - blockSize / 2;
                     } else {
-                        obj.p.y = ((yi * blockSize) + (obj.halfHeight) + blockSize / 2);
+                        obj.p.y = yi * blockSize + obj.halfHeight + blockSize / 2;
                     }
                     return true;
                 } else {
@@ -890,13 +926,12 @@ function barrier_UpDown(obj, newY, land) {
             while (minxi <= maxxi) {
                 //return true if there is a barrier
                 if (checkBlock(minxi, yi)) {
-                    if (testing)
-                        renderBlock(blockMap[minxi][yi].stObj, 'lightgreen');
+                    if (testing) renderBlock(blockMap[minxi][yi].stObj, "lightgreen");
                     if (land) {
                         //make sure player wont stuck into the block
-                        obj.p.y = ((yi * blockSize) - (obj.halfHeight) - blockSize / 2);
+                        obj.p.y = yi * blockSize - obj.halfHeight - blockSize / 2;
                     } else {
-                        obj.p.y = ((yi * blockSize) + (obj.halfHeight) + blockSize / 2);
+                        obj.p.y = yi * blockSize + obj.halfHeight + blockSize / 2;
                     }
                     return true;
                 } else {
@@ -910,27 +945,31 @@ function barrier_UpDown(obj, newY, land) {
 
 //check if block has static object
 function checkBlock(x, y) {
-    return blockMap[x][y] !== undefined && blockMap[x][y].stObj !== undefined && blockMap[x][y].stObj !== null;
+    return (
+        blockMap[x][y] !== undefined &&
+        blockMap[x][y].stObj !== undefined &&
+        blockMap[x][y].stObj !== null
+    );
 }
 
 //detect left or right barrier
 function barrier_LeftRight(obj, newX, left) {
     //get map x index;
-    var xi = indexConvert(((left) ? newX - obj.halfWidth : newX + obj.halfWidth), mapSize.x);
-    //check if there is vertical blocks in this horizontal position 
+    var xi = indexConvert(left ? newX - obj.halfWidth : newX + obj.halfWidth, mapSize.x);
+    //check if there is vertical blocks in this horizontal position
     if (blockMap[xi] !== null && blockMap[xi] !== undefined) {
         //get obj's top y index
-        var minyi = indexConvert((obj.p.y + 1 - obj.halfHeight), mapSize.y);
+        var minyi = indexConvert(obj.p.y + 1 - obj.halfHeight, mapSize.y);
         //get obj's bottom y index
-        var maxyi = indexConvert((obj.p.y - 1 + obj.halfHeight), mapSize.y);
+        var maxyi = indexConvert(obj.p.y - 1 + obj.halfHeight, mapSize.y);
         //if top and bottom is in same block
         if (minyi === maxyi) {
-            //return true is there is no static object else return false     
+            //return true is there is no static object else return false
             if (testing && blockMap[xi][minyi] !== undefined)
-                renderBlock(blockMap[xi][minyi], 'lightgreen');
+                renderBlock(blockMap[xi][minyi], "lightgreen");
             if (checkBlock(xi, minyi)) {
                 //adjust obj coordinate so it wont stuck into the block
-                obj.p.x = ((xi * blockSize) + ((left) ? blockSize : -blockSize));
+                obj.p.x = xi * blockSize + (left ? blockSize : -blockSize);
                 updateOccupied(obj, obj.halfWidth, obj.halfHeight);
                 return true;
             }
@@ -939,10 +978,9 @@ function barrier_LeftRight(obj, newX, left) {
             while (minyi <= maxyi) {
                 //return true if there is a barrier
                 if (checkBlock(xi, minyi)) {
-                    if (testing)
-                        renderBlock(blockMap[xi][minyi].stObj, 'lightgreen');
+                    if (testing) renderBlock(blockMap[xi][minyi].stObj, "lightgreen");
                     //adjust obj coordinate so it wont stuck into the block
-                    obj.p.x = ((xi * blockSize) + ((left) ? blockSize : -blockSize));
+                    obj.p.x = xi * blockSize + (left ? blockSize : -blockSize);
                     updateOccupied(obj, obj.halfWidth, obj.halfHeight);
                     return true;
                 }
@@ -956,10 +994,10 @@ function barrier_LeftRight(obj, newX, left) {
 
 //update the block player occupied
 function updateOccupied(obj, width, height) {
-    var left = indexConvert((obj.p.x - width), mapSize.x);
-    var right = indexConvert((obj.p.x - 1 + width), mapSize.x);
+    var left = indexConvert(obj.p.x - width, mapSize.x);
+    var right = indexConvert(obj.p.x - 1 + width, mapSize.x);
     var top = indexConvert(obj.p.y - height, mapSize.y);
-    var bot = indexConvert((obj.p.y - 1 + height), mapSize.y);
+    var bot = indexConvert(obj.p.y - 1 + height, mapSize.y);
 
     //get all block player occupied
     var newBlocks = [];
@@ -970,7 +1008,10 @@ function updateOccupied(obj, width, height) {
             var tempTop = top;
             while (tempTop <= bot) {
                 if (blockMap[left][tempTop] === undefined) {
-                    blockMap[left][tempTop] = new Block(null, {x: left * blockSize, y: tempTop * blockSize});
+                    blockMap[left][tempTop] = new Block(null, {
+                        x: left * blockSize,
+                        y: tempTop * blockSize
+                    });
                 }
                 newBlocks.push(blockMap[left][tempTop]);
                 tempTop++;
@@ -985,7 +1026,10 @@ function updateOccupied(obj, width, height) {
             var tempTop = top;
             while (tempTop <= bot) {
                 if (blockMap[left][tempTop] === undefined) {
-                    blockMap[left][tempTop] = new Block(null, {x: left * blockSize, y: tempTop * blockSize});
+                    blockMap[left][tempTop] = new Block(null, {
+                        x: left * blockSize,
+                        y: tempTop * blockSize
+                    });
                 }
                 newBlocks.push(blockMap[left][tempTop]);
                 tempTop++;
@@ -994,10 +1038,8 @@ function updateOccupied(obj, width, height) {
         }
     }
     //update
-    if (testing)
-        obj.updateBlock(obj, newBlocks, renderBlock, clearBlock);
-    else
-        obj.updateBlock(obj, newBlocks);
+    if (testing) obj.updateBlock(obj, newBlocks, renderBlock, clearBlock);
+    else obj.updateBlock(obj, newBlocks);
 }
 
 /*-----------------ENEMY EVENT----------------*/
@@ -1008,22 +1050,34 @@ function spawnEnemy() {
         wait = false;
         boss = false;
         setTimeout(function () {
-            enemySpawnSize += 1 + (Math.round(Math.random() * 3));
+            enemySpawnSize += 1 + Math.round(Math.random() * 3);
             spawn = enemySpawnSize;
         }, 4000);
     }
 
     //spawn boss
     if (surviveTime > 1 && (surviveTime === 150 || surviveTime % 421 === 0) && !boss) {
-        console.log('boss comming');
+        console.log("boss comming");
         boss = true;
         var p = {
             x: player.p.x,
-            y: player.p.y - ((blockSize * 30))
+            y: player.p.y - blockSize * 30
         };
         var weapIndex = 2 + Math.round(Math.random() * 2);
-        
-        var enemy = new Entity(p, blockSize * 8, blockSize * 2, 1800, 30, 0, enemyWeapon[weapIndex], player, movementSpeed, 'eboss', '#0a4960');
+
+        var enemy = new Entity(
+            p,
+            blockSize * 8,
+            blockSize * 2,
+            1800,
+            30,
+            0,
+            enemyWeapon[weapIndex],
+            player,
+            movementSpeed,
+            "eboss",
+            "#0a4960"
+        );
         enemy.click = 200 * Math.random() + 300;
         enemy.jf = 1;
         enemyList.push(enemy);
@@ -1037,10 +1091,9 @@ function spawnEnemy() {
             allowType2 = true;
         }
 
-
         var p = {
-            x: player.p.x + ((canvas.width) - (Math.random() * canvas.width * 2)),
-            y: player.p.y - ((blockSize * 4) + blockSize * Math.random() * 20)
+            x: player.p.x + (canvas.width - Math.random() * canvas.width * 2),
+            y: player.p.y - (blockSize * 4 + blockSize * Math.random() * 20)
         };
         var type;
         var weapon;
@@ -1048,19 +1101,17 @@ function spawnEnemy() {
         var height;
         var hp;
         //use as block range
-        var range = blockSize * ((Math.random() * 15) + 10);
+        var range = blockSize * (Math.random() * 15 + 10);
         var speed = movementSpeed * (0.5 + Math.random() * 0.6);
 
         if (randBoolean() && allowType2) {
-
-            type = 'enemy2';
+            type = "enemy2";
             weapon = enemyWeapon[1];
             width = blockSize;
             height = blockSize;
             hp = 20;
-
         } else {
-            type = 'enemy1';
+            type = "enemy1";
             weapon = enemyWeapon[0];
             width = blockSize;
             height = blockSize * 2;
@@ -1076,50 +1127,45 @@ function spawnEnemy() {
     }
 }
 
-
 //move enemy move and shoot
 function enemyMove() {
     if (!enemyList.isEmpty()) {
         enemyList.forEach(function (node) {
             var enemy = node.val;
             switch (enemy.type) {
-                case 'enemy1':
+                case "enemy1":
                     //move type 1 enemy
                     move_type1(enemy);
                     break;
-                case 'enemy2' :
-                case 'eboss':
+                case "enemy2":
+                case "eboss":
                     //move type 1 enemy
                     move_type2(enemy);
             }
 
             //make enemy shoot bullet or stop shooting randomly
-            if (enemy.click <= (50 + Math.random() * 100)) {
-                if (enemy.type !== 'enemy1') {
+            if (enemy.click <= 50 + Math.random() * 100) {
+                if (enemy.type !== "enemy1") {
                     shootBullet(enemy, player.p, true);
                 } else if (enemy.down) {
                     shootBullet(enemy, player.p, true);
                 }
-
-            } else if (enemy.click >= (400 + Math.random() * 400)) {
+            } else if (enemy.click >= 400 + Math.random() * 400) {
                 enemy.click = 0;
-                if (enemy.type === 'eboss') {
+                if (enemy.type === "eboss") {
                     enemy.weapon = enemyWeapon[2 + Math.round(Math.random() * 2)];
                 }
             }
             enemy.click++;
-
         });
     }
-    ;
 }
-
 
 //enemy type 1 move event, dp for jump and only detect collision when up and down is true
 function move_type1(enemy) {
-    //update range, use jf as updateRange timer, initJF as range, 
+    //update range, use jf as updateRange timer, initJF as range,
     if (enemy.jf % 100 === 0) {
-        enemy.initJF = blockSize * ((Math.random() * 20) + 10);
+        enemy.initJF = blockSize * (Math.random() * 20 + 10);
     }
     enemy.jf++;
 
@@ -1140,9 +1186,7 @@ function move_type1(enemy) {
     else if (range <= enemy.initJF * 0.9) {
         enemy.left = !enemy.left;
         enemy.up = true;
-    } else
-        enemy.up = false;
-
+    } else enemy.up = false;
 
     //check left and right collision only when needed
     if (enemy.up && enemy.down) {
@@ -1166,7 +1210,6 @@ function move_type1(enemy) {
         }
     }
 
-
     var newY;
     //jump action
     if (enemy.dp > 0) {
@@ -1179,7 +1222,7 @@ function move_type1(enemy) {
             enemy.p.y = newY;
         } else {
             //shoot top block
-            shootBullet(enemy, {x: enemy.p.x, y: enemy.p.y - 10});
+            shootBullet(enemy, { x: enemy.p.x, y: enemy.p.y - 10 });
         }
         enemy.dp--;
     }
@@ -1187,9 +1230,8 @@ function move_type1(enemy) {
     else if (enemy.moved) {
         //falling speed
         newY = enemy.p.y + enemy.speed;
-        if (!barrier_UpDown(enemy, (newY + enemy.halfHeight), true)) {
+        if (!barrier_UpDown(enemy, newY + enemy.halfHeight, true)) {
             enemy.p.y = newY;
-
         } else {
             //stop jump
             enemy.dp = 0;
@@ -1198,8 +1240,7 @@ function move_type1(enemy) {
             //enemy is deployed on ground
             enemy.down = true;
         }
-    } else
-        enemy.dp = 0;
+    } else enemy.dp = 0;
 
     //update block enemy occupied
     if (enemy.moved) {
@@ -1209,21 +1250,17 @@ function move_type1(enemy) {
 }
 
 function move_type2(enemy) {
-    //update range, use jf as updateRange timer, initJF as range, 
+    //update range, use jf as updateRange timer, initJF as range,
     if (enemy.jf % 100 === 0) {
-        enemy.initJF = blockSize * ((Math.random() * 20) + 10);
+        enemy.initJF = blockSize * (Math.random() * 20 + 10);
     }
     enemy.jf++;
-
 
     var range = Math.abs(player.p.x - enemy.p.x);
 
     if (range > enemy.initJF) {
-
-
         enemy.left = enemy.p.x > player.p.x;
     }
-
 
     var boundary = range > blockCanvas.width / 2;
     //moving toward target
@@ -1238,8 +1275,7 @@ function move_type2(enemy) {
     // }
     //moving away from target if it is 90% inside
 
-
-    var heightrange = player.p.y - (blockSize * 5) - enemy.p.y;
+    var heightrange = player.p.y - blockSize * 5 - enemy.p.y;
     //    console.log(heightrange);
     if (heightrange < 0) {
         enemy.up = true;
@@ -1251,34 +1287,36 @@ function move_type2(enemy) {
         enemy.up = false;
     }
 
-
-
     //check left and right collision only when needed
     // if (enemy.moved) {
 
-    var newX = (enemy.left) ? enemy.p.x - enemy.speed : enemy.p.x + enemy.speed;
+    var newX = enemy.left ? enemy.p.x - enemy.speed : enemy.p.x + enemy.speed;
     if (newX >= blockCanvas.width) {
         newX -= blockCanvas.width;
     } else if (newX < 0) {
         newX += blockCanvas.width;
     }
     //if there is new barrier set enemy x position to new x position
-    if (enemy.type === 'eboss' || !barrier_LeftRight(enemy, newX, enemy.left)) {
+    if (enemy.type === "eboss" || !barrier_LeftRight(enemy, newX, enemy.left)) {
         enemy.p.x = newX;
     }
 
-
     //jump action
-    newY = (enemy.up) ? enemy.p.y - enemy.speed : enemy.p.y + enemy.speed;
+    newY = enemy.up ? enemy.p.y - enemy.speed : enemy.p.y + enemy.speed;
     //check if there is a barrier on top
-    if (enemy.type === 'eboss' || !barrier_UpDown(enemy, (enemy.up) ? newY - enemy.halfHeight : newY + enemy.halfHeight, !enemy.up)) {
+    if (
+        enemy.type === "eboss" ||
+        !barrier_UpDown(
+            enemy,
+            enemy.up ? newY - enemy.halfHeight : newY + enemy.halfHeight,
+            !enemy.up
+        )
+    ) {
         //set new position
         enemy.p.y = newY;
     }
     updateOccupied(enemy, enemy.halfWidth, enemy.halfHeight);
     // }
-
-
 }
 
 /*----------------OBJECT EVENT----------------*/
@@ -1321,7 +1359,7 @@ function bulletAndObj(block, bullet) {
     //reduce block hp
     block.stObj.hp -= bullet.property.dmg;
     if (testing) {
-        block.stObj.color = 'lightgrey';
+        block.stObj.color = "lightgrey";
         renderBlock(block, block.stObj.color);
     }
     //clear block if block hp is 0 or less
@@ -1329,7 +1367,7 @@ function bulletAndObj(block, bullet) {
         block.stObj = null;
         clearBlock(block);
         //add loot if there loot inside this block
-        if (block.background === 'loot') {
+        if (block.background === "loot") {
             addLoot(block);
         }
         player.moved = true;
@@ -1345,13 +1383,13 @@ function bulletAndEntity(block, bullet) {
         //make sure it is not the shooter of the bullet
         if (obj.type.charAt(0) !== bullet.owner.charAt(0) && testCollide(obj, bullet)) {
             var isPlayer = obj === player;
-            //if energy shield active, obj is a player, and has over 200 energy.      
+            //if energy shield active, obj is a player, and has over 200 energy.
             if (isPlayer && energyShield && energy >= 300) {
                 //reduce energy instead of hp, but consume double dmg
                 energy -= bullet.property.dmg * 4;
                 if (energy <= 300) {
                     energyShield = false;
-                    $('#player').removeClass('playerShield');
+                    $("#player").removeClass("playerShield");
                 }
             } else {
                 obj.hp -= bullet.property.dmg;
@@ -1362,14 +1400,13 @@ function bulletAndEntity(block, bullet) {
                 enemyList.removeByValue(obj);
                 if (testing) {
                     obj.destroy(obj, clearBlock);
-                } else
-                    obj.destroy(obj);
+                } else obj.destroy(obj);
                 //add score
                 score += 10;
                 //loot amout
                 var lootV = 25 + Math.round(Math.random() * 55);
                 //bonus for defeating boss
-                if (obj.type === 'eboss') {
+                if (obj.type === "eboss") {
                     lootV = 500;
                     score += 90;
                     player.hp += 150;
@@ -1379,7 +1416,6 @@ function bulletAndEntity(block, bullet) {
             }
             //decrease bullet hp
             bullet.hp--;
-
         }
     }
 }
@@ -1387,9 +1423,8 @@ function bulletAndEntity(block, bullet) {
 //test collision
 function testCollide(obj, bullet) {
     //ballSize * (p1.radius) + ballSize * (p2.radius) - findDist(p1, p2) >= 0;
-    var insideY = (obj.halfHeight + bullet.radius) - Math.abs(bullet.p.y - (obj.p.y)) >= 0;
+    var insideY = obj.halfHeight + bullet.radius - Math.abs(bullet.p.y - obj.p.y) >= 0;
     return insideY;
-
 }
 
 //add loot
@@ -1469,8 +1504,8 @@ function generateBlood(p) {
     for (var i = 0; i < num; i++) {
         var size = 3 + Math.random() * (blockSize / 4);
         var v = {
-            x: (2 - Math.random() * 4),
-            y: (2 - Math.random() * 4)
+            x: 2 - Math.random() * 4,
+            y: 2 - Math.random() * 4
         };
         //p, diameter, hp, color
         var blood = new Obj(p, size, 1);
@@ -1479,18 +1514,16 @@ function generateBlood(p) {
     }
 }
 
-
 /* ----------------CANVAS-DRAW FUNCTION---------------- */
 
 //generate new block canvas
 function newBlockCanvas() {
-    blockCanvas = document.createElement('canvas');
+    blockCanvas = document.createElement("canvas");
     blockCanvas.width = blockSize * mapSize.x;
     blockCanvas.height = blockSize * mapSize.y;
     blockCtx = blockCanvas.getContext("2d");
     blockCtx.clearRect(0, 0, blockCanvas.width, blockCanvas.height);
 }
-
 
 //render block
 function renderBlock(obj, c) {
@@ -1520,26 +1553,23 @@ function renderBullet(bullet) {
 
 //get x and y range based on player position
 function getXYRatio(p) {
-    var p2 = {x: null, y: null};
+    var p2 = { x: null, y: null };
     if (Math.abs(p.x - player.p.x) > blockCanvas.width / 2) {
         if (p.x > player.p.x) {
-            p2.x = p.x - blockCanvas.width - (player.p.x) + canvas.width / 2;
+            p2.x = p.x - blockCanvas.width - player.p.x + canvas.width / 2;
         } else {
-            p2.x = (blockCanvas.width + p.x) - (player.p.x) + canvas.width / 2;
+            p2.x = blockCanvas.width + p.x - player.p.x + canvas.width / 2;
         }
     } else {
-        p2.x = p.x - (player.p.x) + canvas.width / 2;
+        p2.x = p.x - player.p.x + canvas.width / 2;
     }
     p2.y = p.y - (player.p.y + blockSize / 2) + canvas.height / 2;
     return p2;
 }
 
-
 //draw canvas
 function draw() {
-
     ctx.clearRect(0, 0, canvas.width, canvas.height); //clear canvas
-
 
     //draw blood list if not empty
     if (!bloodList.isEmpty()) {
@@ -1560,7 +1590,7 @@ function draw() {
         lootList.forEach(function (node) {
             var loot = node.val;
             ctx.beginPath();
-            ctx.fillStyle = 'rgba(0,255,255,' + Math.random() + ')';
+            ctx.fillStyle = "rgba(0,255,255," + Math.random() + ")";
             var p = getXYRatio(loot.p);
             ctx.arc(p.x, p.y, loot.radius, 0, Math.PI * 2, false);
             ctx.fill();
@@ -1568,37 +1598,38 @@ function draw() {
     }
 
     if (boss) {
-        ctx.fillStyle = '#0a4960';
+        ctx.fillStyle = "#0a4960";
     } else {
-        ctx.fillStyle = 'white';
+        ctx.fillStyle = "white";
     }
     //draw loot if not empty
     if (!enemyList.isEmpty()) {
         enemyList.forEach(function (node) {
             var enemy = node.val;
-            var p = getXYRatio({x: enemy.p.x - enemy.halfWidth, y: enemy.p.y - enemy.halfHeight});
+            var p = getXYRatio({ x: enemy.p.x - enemy.halfWidth, y: enemy.p.y - enemy.halfHeight });
             ctx.fillRect(p.x, p.y, enemy.width, enemy.height);
         });
     }
 
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = "white";
     ctx.font = "20px Comic Sans MS";
     ctx.textAlign = "start";
     ctx.fillText("FPS: " + Math.round(fps), 10, canvas.height - 25);
 
-    ctx.textAlign = 'center';
+    ctx.textAlign = "center";
 
-    ctx.fillText("Coordinate: (" + player.p.x.toFixed(0) + "," + player.p.y.toFixed(0) + ")", canvas.width / 2, canvas.height - 50);
-
+    ctx.fillText(
+        "Coordinate: (" + player.p.x.toFixed(0) + "," + player.p.y.toFixed(0) + ")",
+        canvas.width / 2,
+        canvas.height - 50
+    );
 
     var textX = canvas.width - 20;
-
 
     ctx.textAlign = "end";
     ctx.fillStyle = flyCanvasColor;
     var jf = player.jf * (canvas.height / player.initJF);
     ctx.fillRect(canvas.width - 10, canvas.height - jf, 20, jf);
-
 
     ctx.fillStyle = bldCanvasColor;
     ctx.fillRect(canvas.width - player.hp * 2, 0, player.hp * 2, 30);
@@ -1607,8 +1638,7 @@ function draw() {
     ctx.fillStyle = energyCanvasColor;
     ctx.fillRect(canvas.width - eg, 30, eg, 30);
 
-
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = "white";
     ctx.fillText("HP: " + player.hp, textX, 20);
     if (energyShield) {
         ctx.fillText("Energy (Shield): " + energy, textX, 50);
@@ -1624,18 +1654,13 @@ function draw() {
     ctx.fillText("Enemies: " + enemyList.size, textX, 160);
 }
 
-
-
-
-
-
 //draw sub image from block canvas
 function drawBlockCanvas() {
     var centerX = canvas.width / 2;
     var centerY = canvas.height / 2;
 
-    var sx = player.p.x + (player.halfWidth) - centerX;
-    var sy = player.p.y + (player.halfHeight) - centerY;
+    var sx = player.p.x + player.halfWidth - centerX;
+    var sy = player.p.y + player.halfHeight - centerY;
 
     //connect ending point of block map to the starting point of the map when player come to end boundary.
     if (sx + canvas.width > blockCanvas.width) {
@@ -1651,9 +1676,28 @@ function drawBlockCanvas() {
         var w2 = sx * -1;
         var w1 = canvas.width - w2;
         ctx.drawImage(blockCanvas, 0, sy, w1, canvas.height, w2, 0, w1, canvas.height);
-        ctx.drawImage(blockCanvas, blockCanvas.width - w2, sy, w2, canvas.height, 0, 0, w2, canvas.height);
+        ctx.drawImage(
+            blockCanvas,
+            blockCanvas.width - w2,
+            sy,
+            w2,
+            canvas.height,
+            0,
+            0,
+            w2,
+            canvas.height
+        );
     } else {
-        ctx.drawImage(blockCanvas, sx, sy, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(
+            blockCanvas,
+            sx,
+            sy,
+            canvas.width,
+            canvas.height,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
     }
 }
-

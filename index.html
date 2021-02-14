@@ -5,210 +5,243 @@ To change this template file, choose Tools | Templates
 and open the template in the editor.
 -->
 <html>
-    <head>
-        <title>2D Sandbox Game</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="css/gamestyle.css" type="text/css"/>
-        <link href='https://fonts.googleapis.com/css?family=Lato:300,400,700' rel='stylesheet' type='text/css'>
-        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-        <script src="js/object.js"></script>
 
-        <script src="js/func.js"></script>
-        <script src="js/game.js"></script>
+<head>
+    <title>2D Sandbox Game</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/gamestyle.css" type="text/css" />
+    <link href='https://fonts.googleapis.com/css?family=Lato:300,400,700' rel='stylesheet' type='text/css'>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="js/models/Object.js"></script>
+    <script src="js/models/Block.js"></script>
+    <script src="js/models/Bullet.js"></script>
+    <script src="js/models/Entity.js"></script>
+    <script src="js/models/Weapon.js"></script>
 
-    </head>
+    <script src="js/utilities.js"></script>
+    <script src="js/game.js"></script>
 
-    <body>
+</head>
 
-
-        <canvas width='800' height='600' id="myCanvas"></canvas>
-
-        <div id="player"></div>
-        <!--<button  class="button button1 tp1 " id="play" >Play Game</button>-->
-        <button  id="pause">Pause Game</button>
-
-        <div id="container"></div>
-        <script src="js/starfield.js"></script>
+<body>
 
 
-        <div id="menu">
-            <fieldset>
-                <p class="menulegend">2D SPBLXS Game</p>
-                <p id='playername' class='menuButton'>
-                    Enter Your Name: <input type="text" placeholder="name" >    
-                    <br>
-                    <br>
+    <canvas width='800' height='600' id="myCanvas"></canvas>
 
-                    <span >Map Size:</span>
+    <div id="player"></div>
+    <!--<button  class="button button1 tp1 " id="play" >Play Game</button>-->
+    <button id="pause">Pause Game</button>
 
-                    <span class="mapsize">S</span>
-                    <span class="mapsize mapselect">M</span>
-                    <span class="mapsize">L</span>
-                </p>
-
-                <p  class="menuButton" id="pg"> Play Game</p>
-                <p class="menuButton" id="restart">Restart</p>
-                <p class="menuButton" id="gInfo">Game Information</p>
-                <p class="menuButton" id="scoreB1">Scoreboard</p>
-                <p class="menuButton" id="dInfo">Debug History</p>
-                <p class="menuButton" id="cInfo">About Us</p>
+    <div id="container"></div>
+    <script src="js/starfield.js"></script>
 
 
-            </fieldset>
-        </div>
-
-
-        <table class="scoreboard">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Name</th>
-                    <th>Score</th>
-                    <th>Survive Time</th>
-                </tr>
-            </thead>
-            <tbody id="score"></tbody>
-        </table>
-
-        <table id="itemContent" >
-            <thead>
-                <tr >
-                    <th class="select_weapon">Rifle</th>
-                    <th>Sniper</th>
-                </tr>
-            </thead>
-        </table>
-
-
-        <div id="GameInfo">
-            <p>
-
-            </p>
-
-        </div>
-
-        <div id="contactInfo">
-            <p>
-                <u>Demarcus Lovett</u><br><br>
-                Hello my name is Demarcus Lovett, I am the webmaster of this page.
-                I attend <strong>University of South Carolina Aiken</strong> and my major is computer science.
-                My hobbies include java coding and gaming. I perfer pc games like WOW and ps4 games like Horizon Zero Dawn.
-                My other hobbies include playing football and basketball. <br><br>
-                School Email: <a href="mailto:djlovett@usca.edu">djlovett@usca.edu</a><br>
-                Personal Email: <a href="mailto:lovett.jamar@gmail.com">lovett.jamar@gamil.com</a><br>
-                Personal Phone#: 706-788-5566<br>
-
-
-            </p>
-            <hr>
-            <p>
-                <u>Wei Zheng</u><br><br>
-                My name is Wei Zheng. I am a Computer Science major undergraduate in USC Aiken. I am experienced in Java, JavaScript, HTML, CSS, PHP, MySQL Database, and some C#, C++, Python, and Visual Basic.
+    <div id="menu">
+        <fieldset>
+            <p class="menulegend">2D SPBLXS Game</p>
+            <p id='playername' class='menuButton'>
+                Enter Your Name: <input type="text" placeholder="name">
                 <br>
                 <br>
-                School Email: <a href="mailto:wjzheng@usca.edu">wjzheng@usca.edu</a><br>
-                Personal Email: <a href="mailto:weijie0192@gmail.com">weijie0192@gmail.com</a><br>
-                Personal Phone#: 646-280-6697
+
+                <span>Map Size:</span>
+
+                <span class="mapsize">S</span>
+                <span class="mapsize mapselect">M</span>
+                <span class="mapsize">L</span>
             </p>
-        </div>
-        <div id="GameInfo1">
-            
-           <h1>Game Information</h1>
-           
-           <h3> Purpose</h3>
-            <p>
-                The purpose for this game is to survive and kill as many enemies as possible.
-           </p>
 
-           <h3>Player Health</h3>
-           <p>
-               The player's health is represented as the red bar at the top right corner of the window. The bar 
-               will decrease if the player takes damage. Also the health will regenerate at a rate of 1. If the bar fully depletes to zero the player will die and the game will stop.
-           </p>
-           <h3>Energy/Shield</h3>
-           <p>In this game we make use of energy. The energy is represented as the cyan bar at the top right corner of the window, below health bar.
-               When the game starts the energy bar will decay at a rate of 1.
-               The Energy  can be used as a shield. You can activate the shield by pressing the T key. 
-               While the shield is active, when enemies shoot you it will deplete the shield instead of your health. Also, while you have the shield active it will decay faster at a rate of 6. The shield will take 6-time the damage . Firing the guns and creating a block will also consume energy.
-               The energy will not regenerate like the player's health, to regain energy the player must kill enemies and destroy blocks. 
-           </p>
-           <h3>Jump fuel</h3>
-           <p>
-               Jump fuel is represented as a purple bar at the left bottom hand corner of the screen, going vertically up.
-               With jump fuel the player will be able to jump long distances. When the jump fuel depletes the player will only be able 
-               to do a regular jumps until the jump fuel regenerates. The jump fuel will only regenerate when the player is on the ground.
-           </p>
-           <h3>Movement</h3>
-           <p>
-              Use W,A,D keys to move your character around. W key to jump up, the A key to move right, and the D key to move right.
-              You can also press the spacebar to jump up. The can also dig down/destroy blocks with the mouse scroll button. The player can 
-              place blocks with the mouse right click.
-           </p>
-           <h3>Weapons</h3>
-           <p>
-               In this game you have to two weapon types, the rifle and the sniper. The rifle fires fast
-               but does little damage. The sniper fires slow but does high damage and high penetration. When the game starts, the default 
-               weapon is the rifle. You can change weapons by pressing the E and Q keys, the E key to change to sniper and the Q key to change 
-               back to the rifle. You can also use the mouse to click the rifle and sniper buttons at the bottom of the screen to change weapons.
-               Use the mouse left click to fire your weapon. 
-           </p>
-           <h3>Enemies</h3>
-           <p>
-               There is three enemy types in the game the ground enemies, the flying enemies, and the boss.
-             Ground enemies spawn five seconds into the game. Flying enemies spawn one hundred seconds into the game.
-             The boss spawns one-hundred fifty seconds into the game. The boss has 3 weapon types whereas the ground and flying
-             enemies only have one.
-           </p>
-           <h3>More Interface</h3>
-           <p>
-               The score, survive time and the number of enemies is displayed at the top right below the health and energy bar.
-               The score increases with the amount of enemies killed. The survive time increases the longer you live. The number of enemies decrease as enemies are killed
-               and increases as they spawn.
-           </p>
-           <h3>Map size</h3>
-           <p>
-               In the beginning, when the program starts you can set map size to be small, medium , or larger. On default the map size is at medium.
-            Keep in mind the larger the map size the more memory it will consume, your fps will be lower. 
-            </p>  
-            <h3>ScoreBoard</h3>
-            <p>
-                The ScoreBoard will show the top ten players based on the score or enemies killed. After the player dies the score, the survive time, and the players name will uploaded to the server then sent back to the scoreboard to be displayed.             </p>
-           <h3>Tips</h3>
-           <p>
-               Build blocks around yourself for defense, so the enemies hit the blocks around you instead of you. Also you can dig to avoid enemies, this is a good
-               defense measure as well.Though, when the boss spawns, digging won't help you in fact it will hinder you. So stay above ground for the boss encounter. Keep in mind with the weapons the rife is easier to shoot  but does less damage. While the sniper rife does more damage but it has a slow fire rate,
-               so it will be harder to hit enemies. Also, only use shield if necessary because it will decay faster when active. When you die, your name, score, and survive time will be uploaded to the php server and sent back to the scoreboard. The score board will consist of the top 10 scores, so if you do well you will be legendary. Thank you for playing our game and good luck cause you are going to need it.
-               
-           </p>
+            <p class="menuButton" id="pg"> Play Game</p>
+            <p class="menuButton" id="restart">Restart</p>
+            <p class="menuButton" id="gInfo">Game Information</p>
+            <p class="menuButton" id="scoreB1">Scoreboard</p>
+            <p class="menuButton" id="dInfo">Debug History</p>
+            <p class="menuButton" id="cInfo">About Us</p>
 
-        </div>
-        <div id="debug">
-            <h1>Debug History</h1>
-            <ul>
-                <li>Bug when crossing left and right boundary. Solved by adding extreme cases.</li>
-                <li>player will slip into block. Solved by adding extreme cases.</li>
-                <li>Had a problem with transition between divs. Solved by adding animation transition</li>
-                <li>Bug when enemy would spawn underground. Solved by setting enemy to spawn above and adding a boundary</li>
-               
-            </ul>
-            
-        </div>
 
-        <script>
-            var container = document.getElementById('container');
-            var starfield = new Starfield();
-            starfield.initialise(container);
+        </fieldset>
+    </div>
+
+
+    <table class="scoreboard">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Score</th>
+                <th>Survive Time</th>
+            </tr>
+        </thead>
+        <tbody id="score"></tbody>
+    </table>
+
+    <table id="itemContent">
+        <thead>
+            <tr>
+                <th class="select_weapon">Rifle</th>
+                <th>Sniper</th>
+            </tr>
+        </thead>
+    </table>
+
+
+    <div id="GameInfo">
+        <p>
+
+        </p>
+
+    </div>
+
+    <div id="contactInfo">
+        <p>
+            <u>Demarcus Lovett</u><br><br>
+            Hello my name is Demarcus Lovett, I am the webmaster of this page.
+            I attend <strong>University of South Carolina Aiken</strong> and my major is computer science.
+            My hobbies include java coding and gaming. I perfer pc games like WOW and ps4 games like Horizon Zero Dawn.
+            My other hobbies include playing football and basketball. <br><br>
+            School Email: <a href="mailto:djlovett@usca.edu">djlovett@usca.edu</a><br>
+            Personal Email: <a href="mailto:lovett.jamar@gmail.com">lovett.jamar@gamil.com</a><br>
+            Personal Phone#: 706-788-5566<br>
+
+
+        </p>
+        <hr>
+        <p>
+            <u>Wei Zheng</u><br><br>
+            My name is Wei Zheng. I am a Computer Science major undergraduate in USC Aiken. I am experienced in Java,
+            JavaScript, HTML, CSS, PHP, MySQL Database, and some C#, C++, Python, and Visual Basic.
+            <br>
+            <br>
+            School Email: <a href="mailto:wjzheng@usca.edu">wjzheng@usca.edu</a><br>
+            Personal Email: <a href="mailto:weijie0192@gmail.com">weijie0192@gmail.com</a><br>
+            Personal Phone#: 646-280-6697
+        </p>
+    </div>
+    <div id="GameInfo1">
+
+        <h1>Game Information</h1>
+
+        <h3> Purpose</h3>
+        <p>
+            The purpose for this game is to survive and kill as many enemies as possible.
+        </p>
+
+        <h3>Player Health</h3>
+        <p>
+            The player's health is represented as the red bar at the top right corner of the window. The bar
+            will decrease if the player takes damage. Also the health will regenerate at a rate of 1. If the bar fully
+            depletes to zero the player will die and the game will stop.
+        </p>
+        <h3>Energy/Shield</h3>
+        <p>In this game we make use of energy. The energy is represented as the cyan bar at the top right corner of the
+            window, below health bar.
+            When the game starts the energy bar will decay at a rate of 1.
+            The Energy can be used as a shield. You can activate the shield by pressing the T key.
+            While the shield is active, when enemies shoot you it will deplete the shield instead of your health. Also,
+            while you have the shield active it will decay faster at a rate of 6. The shield will take 6-time the damage
+            . Firing the guns and creating a block will also consume energy.
+            The energy will not regenerate like the player's health, to regain energy the player must kill enemies and
+            destroy blocks.
+        </p>
+        <h3>Jump fuel</h3>
+        <p>
+            Jump fuel is represented as a purple bar at the left bottom hand corner of the screen, going vertically up.
+            With jump fuel the player will be able to jump long distances. When the jump fuel depletes the player will
+            only be able
+            to do a regular jumps until the jump fuel regenerates. The jump fuel will only regenerate when the player is
+            on the ground.
+        </p>
+        <h3>Movement</h3>
+        <p>
+            Use W,A,D keys to move your character around. W key to jump up, the A key to move right, and the D key to
+            move right.
+            You can also press the spacebar to jump up. The can also dig down/destroy blocks with the mouse scroll
+            button. The player can
+            place blocks with the mouse right click.
+        </p>
+        <h3>Weapons</h3>
+        <p>
+            In this game you have to two weapon types, the rifle and the sniper. The rifle fires fast
+            but does little damage. The sniper fires slow but does high damage and high penetration. When the game
+            starts, the default
+            weapon is the rifle. You can change weapons by pressing the E and Q keys, the E key to change to sniper and
+            the Q key to change
+            back to the rifle. You can also use the mouse to click the rifle and sniper buttons at the bottom of the
+            screen to change weapons.
+            Use the mouse left click to fire your weapon.
+        </p>
+        <h3>Enemies</h3>
+        <p>
+            There is three enemy types in the game the ground enemies, the flying enemies, and the boss.
+            Ground enemies spawn five seconds into the game. Flying enemies spawn one hundred seconds into the game.
+            The boss spawns one-hundred fifty seconds into the game. The boss has 3 weapon types whereas the ground and
+            flying
+            enemies only have one.
+        </p>
+        <h3>More Interface</h3>
+        <p>
+            The score, survive time and the number of enemies is displayed at the top right below the health and energy
+            bar.
+            The score increases with the amount of enemies killed. The survive time increases the longer you live. The
+            number of enemies decrease as enemies are killed
+            and increases as they spawn.
+        </p>
+        <h3>Map size</h3>
+        <p>
+            In the beginning, when the program starts you can set map size to be small, medium , or larger. On default
+            the map size is at medium.
+            Keep in mind the larger the map size the more memory it will consume, your fps will be lower.
+        </p>
+        <h3>ScoreBoard</h3>
+        <p>
+            The ScoreBoard will show the top ten players based on the score or enemies killed. After the player dies the
+            score, the survive time, and the players name will uploaded to the server then sent back to the scoreboard
+            to be displayed. </p>
+        <h3>Tips</h3>
+        <p>
+            Build blocks around yourself for defense, so the enemies hit the blocks around you instead of you. Also you
+            can dig to avoid enemies, this is a good
+            defense measure as well.Though, when the boss spawns, digging won't help you in fact it will hinder you. So
+            stay above ground for the boss encounter. Keep in mind with the weapons the rife is easier to shoot but does
+            less damage. While the sniper rife does more damage but it has a slow fire rate,
+            so it will be harder to hit enemies. Also, only use shield if necessary because it will decay faster when
+            active. When you die, your name, score, and survive time will be uploaded to the php server and sent back to
+            the scoreboard. The score board will consist of the top 10 scores, so if you do well you will be legendary.
+            Thank you for playing our game and good luck cause you are going to need it.
+
+        </p>
+
+    </div>
+    <div id="debug">
+        <h1>Debug History</h1>
+        <ul>
+            <li>Bug when crossing left and right boundary. Solved by adding extreme cases.</li>
+            <li>player will slip into block. Solved by adding extreme cases.</li>
+            <li>Had a problem with transition between divs. Solved by adding animation transition</li>
+            <li>Bug when enemy would spawn underground. Solved by setting enemy to spawn above and adding a boundary
+            </li>
+
+        </ul>
+
+    </div>
+
+    <script>
+        var container = document.getElementById('container');
+        var starfield = new Starfield();
+        starfield.initialise(container);
+        starfield.start();
+        function randomise() {
+            starfield.stop();
+            starfield.stars = Math.random() * 1000 + 50;
+            starfield.minV = Math.random() * 30 + 5;
+            starfield.maxV = Math.random() * 50 + starfield.minV;
             starfield.start();
-            function randomise() {
-                starfield.stop();
-                starfield.stars = Math.random() * 1000 + 50;
-                starfield.minV = Math.random() * 30 + 5;
-                starfield.maxV = Math.random() * 50 + starfield.minV;
-                starfield.start();
-            }
-        </script>
-        <footer > <span id="copyright">Copyright 2018&copy; By Wei Zheng and Demarcus Lovett</span> <span id="version">Version 8.01</span></footer>
+        }
+    </script>
+    <footer> <span id="copyright">Copyright 2018&copy; By Wei Zheng and Demarcus Lovett</span> <span
+            id="version">Version 8.01</span></footer>
 
-    </body>
-</html> 
+</body>
+
+</html>
